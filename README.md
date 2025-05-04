@@ -1,86 +1,39 @@
-## DFRobot_ESP_PH_BY_GREENPONIK Library
----------------------------------------------------------
+# ESP32 Library for Gravity: 7/24 Industrial Analog pH Meter Kit V2
 
-ESP Ph Reading and Calibration
-@ https://github.com/greenponik/DFRobot_ESP_PH_BY_GREENPONIK
+## Overview
 
->using Gravity: Analog pH Sensor / Meter Kit V2, SKU:SEN0161-V2
+This library provides an interface for the Gravity: 7/24 Industrial Analog pH Meter Kit V2 specifically tailored for the ESP32 platform.
 
->based on DFRobot_PH @ https://github.com/DFRobot/DFRobot_PH
+**Important Note:** The original **V1** version of the DFRobot Gravity Analog Electrical Conductivity Sensor / Meter **only supports a 5V power supply and is therefore not directly compatible with the 3.3V operating voltage of the ESP32.** This library is designed for **V2 and later versions** of the sensor, which support a wider voltage input range, including 3.3V. Ensure you are using **V2 or a later version** for compatibility with the ESP32.
 
+**Product Link (V2):** [Gravity: 7/24 Industrial Analog pH Meter Kit V2](https://www.dfrobot.com/product-2069.html)
 
-## Example
+This library adapts the functionality of the original Gravity Analog EC library, which is designed for pure Arduino, to be compatible with the ESP32 microcontroller. It builds upon the existing ESP32-compatible library developed by GreenPonik.
 
-```C++
+**Original Arduino Library:** [GitHub - DFRobot/DFRobot_PH](https://github.com/DFRobot/DFRobot_PH)
+**Original ESP32 Library:** [GitHub - GreenPonik/DFRobotz_ESP_PH_BY_GREENPONIK: Arduino library for Gravity: Analog pH Sensor / Meter Kit V2, SKU: SEN0161-V2](https://github.com/GreenPonik/DFRobot_ESP_PH_BY_GREENPONIK)
 
-#include "DFRobot_ESP_PH.h"
-#include <EEPROM.h>
+## Features
+- pH Sensing Range: 0 ~ 14
+- Measurement Accuracy: ±0.1 pH (at 25℃)
+- Probe Life: 7*24 hours >0.5 years (depending on the water quality)
+  - **Note:** The actual readings may vary slightly depending on the calibration values used. 
 
-DFRobot_ESP_PH ph;
-#define ESPADC 4096.0   //the esp Analog Digital Convertion value
-#define ESPVOLTAGE 3300 //the esp voltage supply value
-#define PH_PIN 35		//the esp gpio data pin number
-float voltage, phValue, temperature = 25;
+## ESP32 ADC Considerations
 
-void setup()
-{
-	Serial.begin(115200);
-	EEPROM.begin(32);//needed to permit storage of calibration value in eeprom
-	ph.begin();
-}
+Understanding the characteristics of the ESP32's Analog-to-Digital Converter (ADC) is crucial for accurate readings.
 
-void loop()
-{
-	static unsigned long timepoint = millis();
-	if (millis() - timepoint > 1000U) //time interval: 1s
-	{
-		timepoint = millis();
-		//voltage = rawPinValue / esp32ADC * esp32Vin
-		voltage = analogRead(PH_PIN) / ESPADC * ESPVOLTAGE; // read the voltage
-		Serial.print("voltage:");
-		Serial.println(voltage, 4);
-		
-		//temperature = readTemperature();  // read your temperature sensor to execute temperature compensation
-		Serial.print("temperature:");
-		Serial.print(temperature, 1);
-		Serial.println("^C");
+**References:**
 
-		phValue = ph.readPH(voltage, temperature); // convert voltage to pH with temperature compensation
-		Serial.print("pH:");
-		Serial.println(phValue, 4);
-	}
-	ph.calibration(voltage, temperature); // calibration process by Serail CMD
-}
+- [ESP32 ADC characteristics (Japanese)](https://lang-ship.com/blog/work/esp32-adc/)
+- [Analog to Digital Converter (ADC) Calibration Driver - ESP32 - — ESP-IDF Programming Guide v5.2.1 documentation](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/adc_calibration.html)
 
-float readTemperature()
-{
-	//add your code here to get the temperature from your temperature sensor
-}
+**Key Points:**
 
-```
+- The ESP32 ADC has a nominal reference voltage of 1100mV, but individual units can vary by ±100mV, necessitating calibration for precise measurements.
+- Attenuation is used to extend the measurement range beyond 1100mV.
+- While the 11dB attenuation setting allows measurements up to 3.9V, the accurate measurement range is typically between 150mV and 2450mV (as indicated in previous documentation).
 
-## Compatibility
+## Future Work
 
-MCU                | Work Well | Work Wrong | Untested  | Remarks
------------------- | :----------: | :----------: | :---------: | -----
-ESP32  |      √       |             |            | 
-ESP8266  |             |        √     |            | 
-
-## Credits
-
-Written by Mickael Lehoux from [@greenponik](https://www.greenponik.com/)
-
->Based on written by Jiawei Zhang(Welcome to our [website](https://www.dfrobot.com/))
-
-# Tutorial here
-[![Tutorial here](http://img.youtube.com/vi/EqFw561pO5k/0.jpg)](https://www.youtube.com/watch?v=EqFw561pO5k "PH Meter with ESP32 and DFRobot PH module (SEN0161-V2)")
-
-### Suscribe on our newsletter here: 
-en: http://bit.ly/2NuaKbN
-
-fr: http://bit.ly/2XNf61R
-
-https://www.greenponik.com
-
-## support us
-[become a patreon](https://www.patreon.com/bePatron?u=32614023)
+- Improve and expand the examples provided with the library.
