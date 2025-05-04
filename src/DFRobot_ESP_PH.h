@@ -14,49 +14,49 @@
  * ##################################################
  * ##################################################
  * 
- * version  V1.1
- * date  2019-06
+ * version  V1.0
+ * date  2019-05
  */
 
-#ifndef _DFROBOT_ESP_PH_H_
-#define _DFROBOT_ESP_PH_H_
-
-#include "Arduino.h"
-
-#define PHVALUEADDR 0x00 //the start address of the pH calibration parameters stored in the EEPROM
-
-#define PH_8_VOLTAGE 1122
-#define PH_6_VOLTAGE 1478
-#define PH_5_VOLTAGE 1654
-#define PH_3_VOLTAGE 2010
-
-#define ReceivedBufferLength 10 //length of the Serial CMD buffer
-
-class DFRobot_ESP_PH
-{
-public:
-    DFRobot_ESP_PH();
-    ~DFRobot_ESP_PH();
-    void calibration(float voltage, float temperature, char *cmd); //calibration by Serial CMD
-    void calibration(float voltage, float temperature);
-    float readPH(float voltage, float temperature); // voltage to pH value, with temperature compensation
-    void begin();                                   //initialization
-
-private:
-    float _phValue;
-    float _acidVoltage;
-    float _neutralVoltage;
-    float _voltage;
-    float _temperature;
-
-    char _cmdReceivedBuffer[ReceivedBufferLength]; //store the Serial CMD
-    byte _cmdReceivedBufferIndex;
-
-private:
-    boolean cmdSerialDataAvailable();
-    void phCalibration(byte mode); // calibration process, wirte key parameters to EEPROM
-    byte cmdParse(const char *cmd);
-    byte cmdParse();
-};
-
-#endif
+ #ifndef _DFROBOT_ESP_PH_H_
+ #define _DFROBOT_ESP_PH_H_
+ 
+ #include "Arduino.h"
+ #include "EEPROM.h"
+ 
+ #define PH_8_VOLTAGE 1300
+ #define PH_6_VOLTAGE 1700
+ #define PH_5_VOLTAGE 1800
+ #define PH_3_VOLTAGE 2200
+ #define PH_NEUTRAL_VOLTAGE 1500.0
+ #define PH_ACID_VOLTAGE 2032.44
+ #define ReceivedBufferLength_PH 30
+ #define PHVALUEADDR 0 // PHのEEPROM保存開始アドレス
+ 
+ class DFRobot_ESP_PH
+ {
+ public:
+     DFRobot_ESP_PH();
+     ~DFRobot_ESP_PH();
+     void begin(uint16_t eeprom_start_addr);
+     float readPH(float voltage, float temperature);
+     void calibration(float voltage, float temperature, char *cmd);
+     void calibration(float voltage, float temperature);
+     float acidVoltage;
+     float neutralVoltage;
+ 
+ private:
+     boolean cmdSerialDataAvailable();
+     byte cmdParse(const char *cmd);
+     byte cmdParse();
+     void phCalibration(byte mode);
+     float _temperature;
+     float _phValue;
+     float _voltage;
+     uint16_t _eepromStartAddress;
+     char _cmdReceivedBuffer[ReceivedBufferLength_PH];
+     byte _cmdReceivedBufferIndex;
+ };
+ 
+ #endif
+ 
