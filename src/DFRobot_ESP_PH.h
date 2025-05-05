@@ -30,8 +30,18 @@
  #define PH_3_VOLTAGE 2200
  #define PH_NEUTRAL_VOLTAGE 1500.0
  #define PH_ACID_VOLTAGE 2032.44
+ #define PH_MAX_VOLTAGE 3000
+ #define PH_SENSOR_MAX_RANGE 14
  #define ReceivedBufferLength_PH 30
  #define PHVALUEADDR 0 // PHのEEPROM保存開始アドレス
+ 
+ enum 
+ {
+     PH_CALIBRATION_MODE_ERROR,
+     PH_CALIBRATION_MODE_READY,
+     PH_CALIBRATION_MODE_RUNNING,
+     PH_CALIBRATION_MODE_SAVE_AND_EXIT,
+ };
  
  class DFRobot_ESP_PH
  {
@@ -40,8 +50,9 @@
      ~DFRobot_ESP_PH();
      void begin(uint16_t eeprom_start_addr);
      float readPH(float voltage, float temperature);
-     void calibration(float voltage, float temperature, char *cmd);
-     void calibration(float voltage, float temperature);
+     void calibration(float voltage, float temperature, int mode);
+     void calibration_by_serial_CMD(float voltage, float temperature, char *cmd);
+     void calibration_by_serial_CMD(float voltage, float temperature);
      float acidVoltage;
      float neutralVoltage;
  

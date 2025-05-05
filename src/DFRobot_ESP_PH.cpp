@@ -74,7 +74,15 @@ float DFRobot_ESP_PH::readPH(float voltage, float temperature)
     return this->_phValue;
 }
 
-void DFRobot_ESP_PH::calibration(float voltage, float temperature, char *cmd)
+
+void DFRobot_ESP_PH::calibration(float voltage, float temperature, int mode)
+{
+    this->_voltage = voltage;
+    this->_temperature = temperature;
+    phCalibration(mode);
+}
+
+void DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature, char *cmd)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
@@ -82,7 +90,7 @@ void DFRobot_ESP_PH::calibration(float voltage, float temperature, char *cmd)
     phCalibration(cmdParse(cmd)); // if received Serial CMD from the serial monitor, enter into the calibration mode
 }
 
-void DFRobot_ESP_PH::calibration(float voltage, float temperature)
+void DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
@@ -122,36 +130,36 @@ boolean DFRobot_ESP_PH::cmdSerialDataAvailable()
 
 byte DFRobot_ESP_PH::cmdParse(const char *cmd)
 {
-    byte modeIndex = 0;
+    byte modeIndex = PH_CALIBRATION_MODE_ERROR;
     if (strstr(cmd, "ENTERPH") != NULL)
     {
-        modeIndex = 1;
+        modeIndex = PH_CALIBRATION_MODE_READY;
     }
     else if (strstr(cmd, "EXITPH") != NULL)
     {
-        modeIndex = 3;
+        modeIndex = PH_CALIBRATION_MODE_SAVE_AND_EXIT;
     }
     else if (strstr(cmd, "CALPH") != NULL)
     {
-        modeIndex = 2;
+        modeIndex = PH_CALIBRATION_MODE_RUNNING;
     }
     return modeIndex;
 }
 
 byte DFRobot_ESP_PH::cmdParse()
 {
-    byte modeIndex = 0;
+    byte modeIndex = PH_CALIBRATION_MODE_ERROR;
     if (strstr(this->_cmdReceivedBuffer, "ENTERPH") != NULL)
     {
-        modeIndex = 1;
+        modeIndex = PH_CALIBRATION_MODE_READY;
     }
     else if (strstr(this->_cmdReceivedBuffer, "EXITPH") != NULL)
     {
-        modeIndex = 3;
+        modeIndex = PH_CALIBRATION_MODE_SAVE_AND_EXIT;
     }
     else if (strstr(this->_cmdReceivedBuffer, "CALPH") != NULL)
     {
-        modeIndex = 2;
+        modeIndex = PH_CALIBRATION_MODE_RUNNING;
     }
     return modeIndex;
 }
@@ -163,14 +171,14 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
     static boolean enterCalibrationFlag = 0;
     switch (mode)
     {
-    case 0:
+    case PH_CALIBRATION_MODE_ERROR:
         if (enterCalibrationFlag)
         {
             Serial.println(F(">>>Command Error<<<"));
         }
         break;
 
-    case 1:
+    case PH_CALIBRATION_MODE_READY:
         enterCalibrationFlag = 1;
         phCalibrationFinish = 0;
         Serial.println();
@@ -179,7 +187,7 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
         Serial.println();
         break;
 
-    case 2:
+    case PH_CALIBRATION_MODE_RUNNING:
         if (enterCalibrationFlag)
         {
             if ((this->_voltage > PH_8_VOLTAGE) && (this->_voltage < PH_6_VOLTAGE))
@@ -212,7 +220,7 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
         }
         break;
 
-    case 3: // store calibration value in eeprom
+    case PH_CALIBRATION_MODE_SAVE_AND_EXIT: // store calibration value in eeprom
         if (enterCalibrationFlag)
         {
             Serial.println();
