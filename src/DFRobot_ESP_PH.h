@@ -50,9 +50,9 @@
      void begin(uint16_t eeprom_start_addr);
      void begin(float acidVoltage, float neutralVoltage);
      float readPH(float voltage, float temperature);
-     void calibration(float voltage, float temperature, int mode);
-     void calibration_by_serial_CMD(float voltage, float temperature, char *cmd);
-     void calibration_by_serial_CMD(float voltage, float temperature);
+     boolean calibration(float voltage, float temperature, int mode);
+     boolean calibration_by_serial_CMD(float voltage, float temperature, char *cmd);
+     boolean calibration_by_serial_CMD(float voltage, float temperature);
      float acidVoltage;
      float neutralVoltage;
  
@@ -60,7 +60,7 @@
      boolean cmdSerialDataAvailable();
      byte cmdParse(const char *cmd);
      byte cmdParse();
-     void phCalibration(byte mode);
+     boolean phCalibration(byte mode);
      float _temperature;
      float _phValue;
      float _voltage;

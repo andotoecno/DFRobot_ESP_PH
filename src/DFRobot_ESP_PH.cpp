@@ -89,30 +89,30 @@ float DFRobot_ESP_PH::readPH(float voltage, float temperature)
     return this->_phValue;
 }
 
-
-void DFRobot_ESP_PH::calibration(float voltage, float temperature, int mode)
+boolean DFRobot_ESP_PH::calibration(float voltage, float temperature, int mode)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
-    phCalibration(mode);
+    return phCalibration(mode);
 }
 
-void DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature, char *cmd)
+boolean DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature, char *cmd)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
     strupr(cmd);
-    phCalibration(cmdParse(cmd)); // if received Serial CMD from the serial monitor, enter into the calibration mode
+    return phCalibration(cmdParse(cmd)); // if received Serial CMD from the serial monitor, enter into the calibration mode
 }
 
-void DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature)
+boolean DFRobot_ESP_PH::calibration_by_serial_CMD(float voltage, float temperature)
 {
     this->_voltage = voltage;
     this->_temperature = temperature;
     if (cmdSerialDataAvailable() > 0)
     {
-        phCalibration(cmdParse()); // if received Serial CMD from the serial monitor, enter into the calibration mode
+        return phCalibration(cmdParse()); // if received Serial CMD from the serial monitor, enter into the calibration mode
     }
+    return false; // no command received
 }
 
 boolean DFRobot_ESP_PH::cmdSerialDataAvailable()
@@ -179,7 +179,7 @@ byte DFRobot_ESP_PH::cmdParse()
     return modeIndex;
 }
 
-void DFRobot_ESP_PH::phCalibration(byte mode)
+boolean DFRobot_ESP_PH::phCalibration(byte mode)
 {
     char *receivedBufferPtr;
     static boolean phCalibrationFinish = 0;
@@ -211,9 +211,10 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
                 Serial.print(F(">>>Buffer Solution:7.0"));
                 this->neutralVoltage = this->_voltage;
                 Serial.println(F(",Send EXITPH to Save and Exit<<<"));
-                Serial.println(">>>NeutralVoltage:" + String(this->neutralVoltage)+"<<<");
+                Serial.println(">>>NeutralVoltage:" + String(this->neutralVoltage) + "<<<");
                 Serial.println();
                 phCalibrationFinish = 1;
+                return true;
             }
             else if ((this->_voltage > PH_5_VOLTAGE) && (this->_voltage < PH_3_VOLTAGE))
             { // buffer solution:4.0
@@ -221,9 +222,10 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
                 Serial.print(F(">>>Buffer Solution:4.0"));
                 this->acidVoltage = this->_voltage;
                 Serial.println(F(",Send EXITPH to Save and Exit<<<"));
-                Serial.println(">>>AcidVoltage:" + String(this->acidVoltage)+"<<<");
+                Serial.println(">>>AcidVoltage:" + String(this->acidVoltage) + "<<<");
                 Serial.println();
                 phCalibrationFinish = 1;
+                return true;
             }
             else
             {
@@ -264,4 +266,5 @@ void DFRobot_ESP_PH::phCalibration(byte mode)
         }
         break;
     }
+    return false;
 }
