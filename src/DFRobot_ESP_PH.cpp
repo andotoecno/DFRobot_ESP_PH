@@ -56,6 +56,21 @@ void DFRobot_ESP_PH::begin(uint16_t eeprom_start_addr)
     Serial.println(F("<<<"));
 }
 
+void DFRobot_ESP_PH::begin(float acidVoltage, float neutralVoltage)
+{
+    this->acidVoltage = acidVoltage;
+    this->neutralVoltage = neutralVoltage;
+    EEPROM.writeFloat(this->_eepromStartAddress, this->neutralVoltage);
+    EEPROM.writeFloat(this->_eepromStartAddress + (int)sizeof(float), this->acidVoltage);
+    EEPROM.commit();
+    Serial.println(F(">>>pH Calibration Values<<<"));
+    Serial.print(F(">>>NeutralVoltage: "));
+    Serial.print(this->neutralVoltage);
+    Serial.print(F(", AcidVoltage: "));
+    Serial.print(this->acidVoltage);
+    Serial.println(F("<<<"));
+}
+
 float DFRobot_ESP_PH::readPH(float voltage, float temperature)
 {
     // Serial.print("_neutraVoltage:");

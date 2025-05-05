@@ -33,7 +33,6 @@
  #define PH_MAX_VOLTAGE 3000
  #define PH_SENSOR_MAX_RANGE 14
  #define ReceivedBufferLength_PH 30
- #define PHVALUEADDR 0 // PHのEEPROM保存開始アドレス
  
  enum 
  {
@@ -49,6 +48,7 @@
      DFRobot_ESP_PH();
      ~DFRobot_ESP_PH();
      void begin(uint16_t eeprom_start_addr);
+     void begin(float acidVoltage, float neutralVoltage);
      float readPH(float voltage, float temperature);
      void calibration(float voltage, float temperature, int mode);
      void calibration_by_serial_CMD(float voltage, float temperature, char *cmd);
